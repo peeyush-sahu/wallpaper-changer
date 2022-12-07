@@ -1,9 +1,7 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { StatusBar } from 'expo-status-bar';
-import * as Localization from 'expo-localization';
 import timeZones, { Timezone } from 'timezones.json';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useSelector, useDispatch } from 'react-redux';
 import {
 	Image,
@@ -37,10 +35,15 @@ const AppContainer = () => {
 	).current;
 
 	const getTimeZone = () => {
-		const deviceTimeZone = Localization.timezone;
-		const timeZone = timeZones.filter(tz =>
-			tz.utc.includes(deviceTimeZone)
+		let deviceTimeZoneOffset = new Date().getTimezoneOffset() / 60;
+		deviceTimeZoneOffset =
+			deviceTimeZoneOffset < 0
+				? Math.abs(deviceTimeZoneOffset)
+				: -deviceTimeZoneOffset;
+		const timeZone = timeZones.filter(
+			tz => tz.offset === deviceTimeZoneOffset
 		)[0];
+
 		dispatch(setTimezone(timeZone));
 	};
 
@@ -72,10 +75,7 @@ const AppContainer = () => {
 	return (
 		<View style={styles.container}>
 			<StatusBar style='light' />
-			<LinearGradient
-				colors={['rgba(0,0,0,0.8)', 'transparent']}
-				style={styles.topBackground}
-			/>
+
 			<Image
 				resizeMode='cover'
 				style={styles.wallpaper}
@@ -93,10 +93,7 @@ const AppContainer = () => {
 					{currentTimeZone?.text}
 				</Text>
 			</TouchableOpacity>
-			<LinearGradient
-				colors={['transparent', 'rgba(0,0,0,0.8)']}
-				style={styles.bottomBackground}
-			/>
+
 			<Animated.View
 				style={[styles.timeZonePicker, { height: slideAnim }]}
 			>
@@ -169,6 +166,7 @@ const styles = StyleSheet.create({
 		bottom: 0,
 		zIndex: 3,
 		backgroundColor: 'rgba(0, 0, 0, 0.85)',
+		elevation: 4,
 	},
 
 	fab: {

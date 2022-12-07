@@ -1,6 +1,7 @@
+import moment from 'moment-timezone';
+import { Timezone } from 'timezones.json';
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import { Timezone } from 'timezones.json';
 
 enum Status {
 	morning,
@@ -16,7 +17,7 @@ export interface HomeState {
 }
 
 const initialState: HomeState = {
-	currentTime: 6,
+	currentTime: 0,
 	status: Status.morning,
 	currentTimeZone: {
 		value: 'India Standard Time',
@@ -33,15 +34,13 @@ export const homeSlice = createSlice({
 	initialState,
 	reducers: {
 		setTimezone: (state, action: PayloadAction<Timezone>) => {
-			const dateString = new Date(
-				new Date().toLocaleString('en-US', {
-					timeZone: action.payload.utc[0],
-				})
+			const hour = Number(
+				moment().tz(action.payload.utc[0]).format('HH')
 			);
-			const hour = dateString.getHours();
 
 			state.currentTimeZone = action.payload;
-			state.currentTime = dateString.getHours();
+			state.currentTime = hour;
+
 			if (hour < 12) {
 				state.status = Status.morning;
 			} else if (hour <= 17) {
